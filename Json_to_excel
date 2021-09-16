@@ -1,0 +1,654 @@
+"""
+@author: Lauratdo
+"""
+import json
+import openpyxl
+
+# define a new variable for tweets
+tweets=[]
+
+# import tweets from JSON
+for line in open("file_name.txt"):
+    try:
+        tweets.append(json.loads(line))
+    except:
+        pass
+    
+# create a new variable for a single tweets
+tweet=tweets[0]
+# pull out various data from the tweets
+tweet_id = [tweet['id'] for tweet in tweets]
+tweet_text = [tweet['text'] for tweet in tweets]
+tweet_time= [tweet['created_at'] for tweet in tweets]
+tweet_author = [tweet['user']['screen_name'] for tweet in tweets]
+tweet_author_id = [tweet['user']['id'] for tweet in tweets]
+tweet_author_loc=[tweet['user']['location']for tweet in tweets]
+#tweet_author_geo_enable=[tweet['user']['geo_enabled'] for tweet in tweets] #true or false
+#tweet_author_time_zone=[tweet['user']['time_zone']for tweet in tweets]  #all are null           
+tweet_language = [tweet['lang'] for tweet in tweets]
+tweet_geo= [tweet['geo']for tweet in tweets]
+tweet_geo_type=[]
+tweet_geo_coordinates0=[]
+tweet_geo_coordinates1=[]
+for j in range(len(tweet_geo)):
+    if tweet_geo[j]==None:
+        tweet_geo_type.append(None)
+        tweet_geo_coordinates0.append(None)
+        tweet_geo_coordinates1.append(None)
+    else:
+        tweet_geo_type.append(tweet_geo[j]['type'])
+        tweet_geo_coordinates0.append(tweet_geo[j]['coordinates'][0])
+        tweet_geo_coordinates1.append(tweet_geo[j]['coordinates'][1])
+#tweet_coordinates = [tweet['coordinates'] for tweet in tweets]
+tweet_place=[tweet['place'] for tweet in tweets]
+tweet_place_id=[]
+tweet_place_name=[]
+tweet_place_country=[]
+tweet_bounding_box_type=[]
+tweet_bounding_box_coordinates_0_0_0=[]
+tweet_bounding_box_coordinates_0_0_1=[]
+tweet_bounding_box_coordinates_0_1_0=[]
+tweet_bounding_box_coordinates_0_1_1=[]
+tweet_bounding_box_coordinates_0_2_0=[]
+tweet_bounding_box_coordinates_0_2_1=[]
+tweet_bounding_box_coordinates_0_3_0=[]
+tweet_bounding_box_coordinates_0_3_1=[]
+tweet_place_type=[]
+for aux in range(len(tweet_place)):
+    if tweet_place[aux]!= None:
+        tweet_place_id.append(tweet_place[aux]['id'])
+        tweet_place_name.append(tweet_place[aux]['name'])
+        tweet_place_country.append(tweet_place[aux]['country'])
+        tweet_bounding_box_type.append(tweet_place[aux]['bounding_box']['type'])
+        tweet_bounding_box_coordinates_0_0_0.append(tweet_place[aux]['bounding_box']['coordinates'][0][0][0])
+        tweet_bounding_box_coordinates_0_0_1.append(tweet_place[aux]['bounding_box']['coordinates'][0][0][1])
+        tweet_bounding_box_coordinates_0_1_0.append(tweet_place[aux]['bounding_box']['coordinates'][0][1][0])
+        tweet_bounding_box_coordinates_0_1_1.append(tweet_place[aux]['bounding_box']['coordinates'][0][1][1])
+        tweet_bounding_box_coordinates_0_2_0.append(tweet_place[aux]['bounding_box']['coordinates'][0][2][0])
+        tweet_bounding_box_coordinates_0_2_1.append(tweet_place[aux]['bounding_box']['coordinates'][0][2][1])
+        tweet_bounding_box_coordinates_0_3_0.append(tweet_place[aux]['bounding_box']['coordinates'][0][3][0])
+        tweet_bounding_box_coordinates_0_3_1.append(tweet_place[aux]['bounding_box']['coordinates'][0][3][1])
+        tweet_place_type.append(tweet_place[aux]['place_type'])
+    else:
+        tweet_place_id.append(None)
+        tweet_place_name.append(None)
+        tweet_place_country.append(None)
+        tweet_bounding_box_type.append(None)
+        tweet_bounding_box_coordinates_0_0_0.append(None)
+        tweet_bounding_box_coordinates_0_0_1.append(None)
+        tweet_bounding_box_coordinates_0_1_0.append(None)
+        tweet_bounding_box_coordinates_0_1_1.append(None)
+        tweet_bounding_box_coordinates_0_2_0.append(None)
+        tweet_bounding_box_coordinates_0_2_1.append(None)
+        tweet_bounding_box_coordinates_0_3_0.append(None)
+        tweet_bounding_box_coordinates_0_3_1.append(None)
+        tweet_place_type.append(None)
+tweet_entities_user_mentions=[tweet['entities']['user_mentions'] for tweet in tweets]
+tweet_entities_user_mentions_screen_name1=[]
+tweet_entities_user_mentions_user_id1=[]
+tweet_entities_user_mentions_screen_name2=[]
+tweet_entities_user_mentions_user_id2=[]
+for i in range(len(tweet_entities_user_mentions)):
+    tweet_i=tweet_entities_user_mentions[i]
+    if tweet_i!=[]:
+        tweet_entities_user_mentions_screen_name1.append(tweet_entities_user_mentions[i][0]['screen_name'])
+        tweet_entities_user_mentions_user_id1.append(tweet_entities_user_mentions[i][0]['id'])
+    else:
+        tweet_entities_user_mentions_screen_name1.append(None)
+        tweet_entities_user_mentions_user_id1.append(None)
+
+#tweet_place_full_name=[tweet['place']['full_name'] for tweet in tweets] #same that place/name+ + place/country
+#tweet_place_country_code=[tweet['place']['country_code']for tweet in tweets] #same that country
+# place/url
+#tweet_id_str=[tweet['id_str'] for tweet in tweets] #same tweet_id
+#tweet_source=[tweet['source'] for tweet in tweets]
+#tweet_truncated=[tweet['truncated'] for tweet in tweets]
+#tweet_favorited=[tweet['favorited'] for tweet in tweets]
+#tweet_retweeted=[tweet['retweeted'] for tweet in tweets]
+tweet_user_id=[tweet['user']['id'] for tweet in tweets]
+
+#More possible data to consider
+#user/name                                  #user/url		
+#user/translator_type	                    #user/protected	
+#user/verified	                            #user/followers_count	
+#user/friends_count	                        #user/listed_count	    
+#user/description                           #user/notifications	
+#user/favourites_count	                    #user/statuses_count	
+#user/created_at	                        #user/utc_offset
+#user/lang	                                #user/contributors_enabled	
+#user/profile_background_color              #user/profile_background_image_url	
+#user/profile_background_image_url_https	#user/profile_background_tile	
+#user/profile_link_color	                #user/profile_sidebar_border_color	
+#user/profile_sidebar_fill_color	        #user/profile_text_color	
+#user/profile_use_background_image	        #user/is_translator	
+#user/profile_image_url	                    #user/profile_image_url_https	
+#user/profile_banner_url	                #user/default_profile	
+#user/default_profile_image	                #user/following	
+#user/follow_request_sent	    
+#quoted_status/geo	
+#quoted_status/coordinates	
+#quoted_status/place
+# in_reply_to_status_id	
+#in_reply_to_status_id_str	
+#in_reply_to_user_id	
+#in_reply_to_user_id_str	
+#in_reply_to_screen_name	
+#contributors
+#filter_level	
+#timestamp_ms	
+#display_text_range/0	
+#display_text_range/1	
+#is_quote_status	
+#quote_count	
+#reply_count	
+#retweet_count	
+#favorite_count	
+#quoted_status_id	
+#quoted_status_id_str	
+#quoted_status/created_at	
+#quoted_status/id	
+#quoted_status/id_str	
+#quoted_status/text	
+#quoted_status/display_text_range/0	
+#quoted_status/display_text_range/1	
+#quoted_status/source	
+#quoted_status/truncated	
+#quoted_status/in_reply_to_status_id	
+#quoted_status/in_reply_to_status_id_str	
+#quoted_status/in_reply_to_user_id	
+#quoted_status/in_reply_to_user_id_str	
+#quoted_status/in_reply_to_screen_name	
+#quoted_status/user/id	
+#quoted_status/user/id_str	
+#quoted_status/user/name	
+#quoted_status/user/screen_name	
+#quoted_status/user/location	
+#quoted_status/user/url	
+#quoted_status/user/description	
+#quoted_status/user/translator_type	
+#quoted_status/user/protected	
+#quoted_status/user/verified	
+#quoted_status/user/followers_count	
+#quoted_status/user/friends_count	
+#quoted_status/user/listed_count	
+#quoted_status/user/favourites_count	
+#quoted_status/user/statuses_count	
+#quoted_status/user/created_at	
+#quoted_status/user/utc_offset	
+#quoted_status/user/time_zone	
+#quoted_status/user/geo_enabled	
+#quoted_status/user/lang	
+#quoted_status/user/contributors_enabled	
+#quoted_status/user/is_translator
+#quoted_status/user/profile_background_color	
+#quoted_status/user/profile_background_image_url	
+#quoted_status/user/profile_background_image_url_https	
+#quoted_status/user/profile_background_tile	
+#quoted_status/user/profile_link_color	
+#quoted_status/user/profile_sidebar_border_color	
+#quoted_status/user/profile_sidebar_fill_color	
+#quoted_status/user/profile_text_color	
+#quoted_status/user/profile_use_background_image	
+#quoted_status/user/profile_image_url	
+#quoted_status/user/profile_image_url_https	
+#quoted_status/user/profile_banner_url	
+#quoted_status/user/default_profile	
+#quoted_status/user/default_profile_image	
+#quoted_status/user/following	
+#quoted_status/user/follow_request_sent	
+#quoted_status/user/notifications		
+#quoted_status/contributors	
+#quoted_status/is_quote_status	
+#quoted_status/extended_tweet/full_text	
+#quoted_status/extended_tweet/display_text_range/0	
+#quoted_status/extended_tweet/display_text_range/1	
+#quoted_status/extended_tweet/entities/hashtags/0/text	
+#quoted_status/extended_tweet/entities/hashtags/0/indices/0	
+#quoted_status/extended_tweet/entities/hashtags/0/indices/1	
+#quoted_status/extended_tweet/entities/hashtags/1/text	
+#quoted_status/extended_tweet/entities/hashtags/1/indices/0	
+#quoted_status/extended_tweet/entities/hashtags/1/indices/1	
+#quoted_status/extended_tweet/entities/user_mentions/0/screen_name	
+#quoted_status/extended_tweet/entities/user_mentions/0/name	
+#quoted_status/extended_tweet/entities/user_mentions/0/id
+#quoted_status/extended_tweet/entities/user_mentions/0/id_str	
+#quoted_status/extended_tweet/entities/user_mentions/0/indices/0	
+#quoted_status/extended_tweet/entities/user_mentions/0/indices/1	
+#quoted_status/extended_tweet/entities/user_mentions/1/screen_name	
+#quoted_status/extended_tweet/entities/user_mentions/1/name	
+#quoted_status/extended_tweet/entities/user_mentions/1/id	
+#quoted_status/extended_tweet/entities/user_mentions/1/id_str	
+#quoted_status/extended_tweet/entities/user_mentions/1/indices/0	
+#quoted_status/extended_tweet/entities/user_mentions/1/indices/1	
+#quoted_status/extended_tweet/entities/user_mentions/2/screen_name
+#quoted_status/extended_tweet/entities/user_mentions/2/name	
+#quoted_status/extended_tweet/entities/user_mentions/2/id	
+#quoted_status/extended_tweet/entities/user_mentions/2/id_str	
+#quoted_status/extended_tweet/entities/user_mentions/2/indices/0	
+#quoted_status/extended_tweet/entities/user_mentions/2/indices/1	
+#quoted_status/extended_tweet/entities/user_mentions/3/screen_name	
+#quoted_status/extended_tweet/entities/user_mentions/3/name	
+#quoted_status/extended_tweet/entities/user_mentions/3/id	
+#quoted_status/extended_tweet/entities/user_mentions/3/id_str	
+#quoted_status/extended_tweet/entities/user_mentions/3/indices/0	
+#quoted_status/extended_tweet/entities/user_mentions/3/indices/1	
+#quoted_status/extended_tweet/entities/user_mentions/4/screen_name	
+#quoted_status/extended_tweet/entities/user_mentions/4/name	
+#quoted_status/extended_tweet/entities/user_mentions/4/id	
+#quoted_status/extended_tweet/entities/user_mentions/4/id_str	
+#quoted_status/extended_tweet/entities/user_mentions/4/indices/0	
+#quoted_status/extended_tweet/entities/user_mentions/4/indices/1	
+#quoted_status/extended_tweet/entities/user_mentions/5/screen_name	
+#quoted_status/extended_tweet/entities/user_mentions/5/name	
+#quoted_status/extended_tweet/entities/user_mentions/5/id	
+#quoted_status/extended_tweet/entities/user_mentions/5/id_str	
+#quoted_status/extended_tweet/entities/user_mentions/5/indices/0	
+#quoted_status/extended_tweet/entities/user_mentions/5/indices/1	
+#quoted_status/extended_tweet/entities/user_mentions/6/screen_name	
+#quoted_status/extended_tweet/entities/user_mentions/6/name	
+#quoted_status/extended_tweet/entities/user_mentions/6/id	
+#quoted_status/extended_tweet/entities/user_mentions/6/id_str	
+#quoted_status/extended_tweet/entities/user_mentions/6/indices/0	
+#quoted_status/extended_tweet/entities/user_mentions/6/indices/1	
+#quoted_status/extended_tweet/entities/media/0/id	
+#quoted_status/extended_tweet/entities/media/0/id_str	
+#quoted_status/extended_tweet/entities/media/0/indices/0	
+#quoted_status/extended_tweet/entities/media/0/indices/1	
+#quoted_status/extended_tweet/entities/media/0/media_url	
+#quoted_status/extended_tweet/entities/media/0/media_url_https	
+#quoted_status/extended_tweet/entities/media/0/url	
+#quoted_status/extended_tweet/entities/media/0/display_url	
+#quoted_status/extended_tweet/entities/media/0/expanded_url	
+#quoted_status/extended_tweet/entities/media/0/type	
+#quoted_status/extended_tweet/entities/media/0/sizes/thumb/w	
+#quoted_status/extended_tweet/entities/media/0/sizes/thumb/h	
+#quoted_status/extended_tweet/entities/media/0/sizes/thumb/resize	
+#quoted_status/extended_tweet/entities/media/0/sizes/medium/w	
+#quoted_status/extended_tweet/entities/media/0/sizes/medium/h	
+#quoted_status/extended_tweet/entities/media/0/sizes/medium/resize	
+#quoted_status/extended_tweet/entities/media/0/sizes/small/w	
+#quoted_status/extended_tweet/entities/media/0/sizes/small/h	
+#quoted_status/extended_tweet/entities/media/0/sizes/small/resize	
+#quoted_status/extended_tweet/entities/media/0/sizes/large/w	
+#quoted_status/extended_tweet/entities/media/0/sizes/large/h	
+#quoted_status/extended_tweet/entities/media/0/sizes/large/resize	
+#quoted_status/extended_tweet/extended_entities/media/0/id	
+#quoted_status/extended_tweet/extended_entities/media/0/id_str	
+#quoted_status/extended_tweet/extended_entities/media/0/indices/0	
+#quoted_status/extended_tweet/extended_entities/media/0/indices/1	
+#quoted_status/extended_tweet/extended_entities/media/0/media_url	
+#quoted_status/extended_tweet/extended_entities/media/0/media_url_https	
+#quoted_status/extended_tweet/extended_entities/media/0/url	
+#quoted_status/extended_tweet/extended_entities/media/0/display_url	
+#quoted_status/extended_tweet/extended_entities/media/0/expanded_url	
+#quoted_status/extended_tweet/extended_entities/media/0/type	
+#quoted_status/extended_tweet/extended_entities/media/0/sizes/thumb/w	
+#quoted_status/extended_tweet/extended_entities/media/0/sizes/thumb/h	
+#quoted_status/extended_tweet/extended_entities/media/0/sizes/thumb/resize	
+#quoted_status/extended_tweet/extended_entities/media/0/sizes/medium/w	
+#quoted_status/extended_tweet/extended_entities/media/0/sizes/medium/h	
+#quoted_status/extended_tweet/extended_entities/media/0/sizes/medium/resize	
+#quoted_status/extended_tweet/extended_entities/media/0/sizes/small/w	
+#quoted_status/extended_tweet/extended_entities/media/0/sizes/small/h	
+#quoted_status/extended_tweet/extended_entities/media/0/sizes/small/resize	
+#quoted_status/extended_tweet/extended_entities/media/0/sizes/large/w	
+#quoted_status/extended_tweet/extended_entities/media/0/sizes/large/h	
+#quoted_status/extended_tweet/extended_entities/media/0/sizes/large/resize	
+#quoted_status/quote_count	
+#quoted_status/reply_count	
+#quoted_status/retweet_count	
+#quoted_status/favorite_count	
+#quoted_status/entities/urls/0/url	
+#quoted_status/entities/urls/0/expanded_url	
+#quoted_status/entities/urls/0/display_url	
+#quoted_status/entities/urls/0/indices/0	
+#quoted_status/entities/urls/0/indices/1	
+#quoted_status/favorited	
+#quoted_status/retweeted	
+#quoted_status/possibly_sensitive
+#quoted_status/filter_level	
+#quoted_status/lang	
+#quoted_status_permalink/url	
+#quoted_status_permalink/expanded	
+#quoted_status_permalink/display
+#quoted_status/entities/hashtags/0/indices/0	
+#quoted_status/entities/hashtags/0/indices/1	
+#quoted_status/entities/user_mentions/0/screen_name	
+#quoted_status/entities/user_mentions/0/name	
+#quoted_status/entities/user_mentions/0/id	
+#quoted_status/entities/user_mentions/0/id_str	
+#quoted_status/entities/user_mentions/0/indices/0	
+#quoted_status/entities/user_mentions/0/indices/1
+#quoted_status/entities/media/0/indices/0	
+#quoted_status/entities/media/0/indices/1	
+#quoted_status/entities/media/0/media_url	
+#quoted_status/entities/media/0/media_url_https	
+#quoted_status/entities/media/0/url	
+#quoted_status/entities/media/0/display_url	
+#quoted_status/entities/media/0/expanded_url	
+#quoted_status/entities/media/0/type	
+#quoted_status/entities/media/0/sizes/thumb/w	
+#quoted_status/entities/media/0/sizes/thumb/h	
+#quoted_status/entities/media/0/sizes/thumb/resize	
+#quoted_status/entities/media/0/sizes/large/w	
+#quoted_status/entities/media/0/sizes/large/h	
+#quoted_status/entities/media/0/sizes/large/resize	
+#quoted_status/entities/media/0/sizes/medium/w	
+#quoted_status/entities/media/0/sizes/medium/h	
+#quoted_status/entities/media/0/sizes/medium/resize	
+#quoted_status/entities/media/0/sizes/small/w	
+#quoted_status/entities/media/0/sizes/small/h	
+#quoted_status/entities/media/0/sizes/small/resize	
+#quoted_status/extended_entities/media/0/id	
+#quoted_status/extended_entities/media/0/id_str	
+#quoted_status/extended_entities/media/0/indices/0	
+#quoted_status/extended_entities/media/0/indices/1	
+#quoted_status/extended_entities/media/0/media_url	
+#quoted_status/extended_entities/media/0/media_url_https	
+#quoted_status/extended_entities/media/0/url	
+#quoted_status/extended_entities/media/0/display_url	
+#quoted_status/extended_entities/media/0/expanded_url	
+#quoted_status/extended_entities/media/0/type	
+#quoted_status/extended_entities/media/0/sizes/thumb/w	
+#quoted_status/extended_entities/media/0/sizes/thumb/h	
+#quoted_status/extended_entities/media/0/sizes/thumb/resize	
+#quoted_status/extended_entities/media/0/sizes/large/w	
+#quoted_status/extended_entities/media/0/sizes/large/h	
+#quoted_status/extended_entities/media/0/sizes/large/resize	
+#quoted_status/extended_entities/media/0/sizes/medium/w	
+#quoted_status/extended_entities/media/0/sizes/medium/h	
+#quoted_status/extended_entities/media/0/sizes/medium/resize	
+#quoted_status/extended_entities/media/0/sizes/small/w	
+#quoted_status/extended_entities/media/0/sizes/small/h	
+#quoted_status/extended_entities/media/0/sizes/small/resize	
+#quoted_status/place/bounding_box/type	
+#quoted_status/place/bounding_box/coordinates/0/0/0	
+#quoted_status/place/bounding_box/coordinates/0/0/1	
+#quoted_status/place/bounding_box/coordinates/0/1/0	
+#quoted_status/place/bounding_box/coordinates/0/1/1	
+#quoted_status/place/bounding_box/coordinates/0/2/0	
+#quoted_status/place/bounding_box/coordinates/0/2/1	
+#quoted_status/place/bounding_box/coordinates/0/3/0	
+#quoted_status/place/bounding_box/coordinates/0/3/1	
+#quoted_status/place/place_type	
+#quoted_status/place/name	
+#quoted_status/place/full_name	
+#quoted_status/place/country_code	
+#quoted_status/place/country
+#quoted_status/extended_entities/media/1/id_str	
+#quoted_status/extended_entities/media/1/indices/0	
+#quoted_status/extended_entities/media/1/indices/1	
+#quoted_status/extended_entities/media/1/media_url	
+#quoted_status/extended_entities/media/1/media_url_https	
+#quoted_status/extended_entities/media/1/url	
+#quoted_status/extended_entities/media/1/display_url	
+#quoted_status/extended_entities/media/1/expanded_url	
+#quoted_status/extended_entities/media/1/type	
+#quoted_status/extended_entities/media/1/sizes/thumb/w	
+#quoted_status/extended_entities/media/1/sizes/thumb/h	
+#quoted_status/extended_entities/media/1/sizes/thumb/resize	
+#quoted_status/extended_entities/media/1/sizes/large/w	
+#quoted_status/extended_entities/media/1/sizes/large/h	
+#quoted_status/extended_entities/media/1/sizes/large/resize	quoted_status/extended_entities/media/1/sizes/medium/w	
+#quoted_status/extended_entities/media/1/sizes/medium/h	quoted_status/extended_entities/media/1/sizes/medium/resize	
+#quoted_status/extended_entities/media/1/sizes/small/w	quoted_status/extended_entities/media/1/sizes/small/h	
+#quoted_status/extended_entities/media/1/sizes/small/resize	
+#quoted_status/extended_tweet/entities/media/0/additional_media_info/monetizable	
+#quoted_status/extended_tweet/entities/media/0/video_info/aspect_ratio/0	
+#quoted_status/extended_tweet/entities/media/0/video_info/aspect_ratio/1	
+#quoted_status/extended_tweet/entities/media/0/video_info/duration_millis	
+#quoted_status/extended_tweet/entities/media/0/video_info/variants/0/bitrate	
+#quoted_status/extended_tweet/entities/media/0/video_info/variants/0/content_type	
+#quoted_status/extended_tweet/entities/media/0/video_info/variants/0/url	
+#quoted_status/extended_tweet/entities/media/0/video_info/variants/1/content_type	
+#quoted_status/extended_tweet/entities/media/0/video_info/variants/1/url	
+#quoted_status/extended_tweet/entities/media/0/video_info/variants/2/bitrate	
+#quoted_status/extended_tweet/entities/media/0/video_info/variants/2/content_type	
+#quoted_status/extended_tweet/entities/media/0/video_info/variants/2/url	
+#quoted_status/extended_tweet/entities/media/0/video_info/variants/3/bitrate	
+#quoted_status/extended_tweet/entities/media/0/video_info/variants/3/content_type	
+#quoted_status/extended_tweet/entities/media/0/video_info/variants/3/url	
+#quoted_status/extended_tweet/entities/media/0/source_status_id	
+#quoted_status/extended_tweet/entities/media/0/source_status_id_str	
+#quoted_status/extended_tweet/entities/media/0/source_user_id	
+#quoted_status/extended_tweet/entities/media/0/source_user_id_str	
+#quoted_status/extended_tweet/extended_entities/media/0/additional_media_info/monetizable	
+#quoted_status/extended_tweet/extended_entities/media/0/video_info/aspect_ratio/0	
+#quoted_status/extended_tweet/extended_entities/media/0/video_info/aspect_ratio/1	
+#quoted_status/extended_tweet/extended_entities/media/0/video_info/duration_millis	
+#quoted_status/extended_tweet/extended_entities/media/0/video_info/variants/0/bitrate	
+#quoted_status/extended_tweet/extended_entities/media/0/video_info/variants/0/content_type	
+#quoted_status/extended_tweet/extended_entities/media/0/video_info/variants/0/url	
+#quoted_status/extended_tweet/extended_entities/media/0/video_info/variants/1/content_type	
+#quoted_status/extended_tweet/extended_entities/media/0/video_info/variants/1/url	
+#quoted_status/extended_tweet/extended_entities/media/0/video_info/variants/2/bitrate	
+#quoted_status/extended_tweet/extended_entities/media/0/video_info/variants/2/content_type	
+#quoted_status/extended_tweet/extended_entities/media/0/video_info/variants/2/url	
+#quoted_status/extended_tweet/extended_entities/media/0/video_info/variants/3/bitrate	
+#quoted_status/extended_tweet/extended_entities/media/0/video_info/variants/3/content_type	
+#quoted_status/extended_tweet/extended_entities/media/0/video_info/variants/3/url	
+#quoted_status/extended_tweet/extended_entities/media/0/source_status_id	
+#quoted_status/extended_tweet/extended_entities/media/0/source_status_id_str	
+#quoted_status/extended_tweet/extended_entities/media/0/source_user_id	
+#quoted_status/extended_tweet/extended_entities/media/0/source_user_id_str	
+#quoted_status/entities/user_mentions/1/screen_name	
+#quoted_status/entities/user_mentions/1/name	
+#quoted_status/entities/user_mentions/1/id	
+#quoted_status/entities/user_mentions/1/id_str	
+#quoted_status/entities/user_mentions/1/indices/0	
+#quoted_status/entities/user_mentions/1/indices/1	
+#quoted_status/entities/user_mentions/2/screen_name	quoted_status/entities/user_mentions/2/name	
+#quoted_status/entities/user_mentions/2/id	quoted_status/entities/user_mentions/2/id_str	
+#quoted_status/entities/user_mentions/2/indices/0	quoted_status/entities/user_mentions/2/indices/1
+#entities/user_mentions/2/screen_name	entities/user_mentions/2/name	
+#entities/user_mentions/2/id	entities/user_mentions/2/id_str	entities/user_mentions/2/indices/0	
+#entities/user_mentions/2/indices/1	entities/user_mentions/3/screen_name	entities/user_mentions/3/name	
+#entities/user_mentions/3/id	entities/user_mentions/3/id_str	entities/user_mentions/3/indices/0	
+#extended_tweet/entities/hashtags/0/text
+#extended_tweet/entities/media/0/id
+#entities/hashtags/0/text	
+#entities/hashtags/0/indices/0	   entities/hashtags/0/indices/1	entities/hashtags/1/text	
+#entities/hashtags/1/indices/0	   entities/hashtags/1/indices/1	entities/hashtags/2/text	
+#entities/hashtags/2/indices/0	   entities/hashtags/2/indices/1	entities/hashtags/3/text	
+#entities/hashtags/3/indices/0	   quoted_status/entities/hashtags/0/text	
+#entities/hashtags/3/indices/1	
+#entities/media/0/id	           entities/media/0/id_str	        entities/media/0/indices/0	
+#entities/media/0/indices/1	       entities/media/0/media_url	
+#entities/media/0/media_url_https  entities/media/0/url	
+#entities/media/0/display_url	   entities/media/0/expanded_url	entities/media/0/type	
+#entities/media/0/sizes/thumb/w	   entities/media/0/sizes/thumb/h	entities/media/0/sizes/thumb/resize	
+#entities/media/0/sizes/medium/w   entities/media/0/sizes/medium/h	
+#entities/media/0/sizes/medium/resize	entities/media/0/sizes/large/w	entities/media/0/sizes/large/h	
+#entities/media/0/sizes/large/resize	entities/media/0/sizes/small/w	entities/media/0/sizes/small/h	
+#entities/media/0/sizes/small/resize	extended_entities/media/0/id	extended_entities/media/0/id_str	
+#extended_entities/media/0/indices/0	extended_entities/media/0/indices/1	
+#extended_entities/media/0/media_url	
+#extended_entities/media/0/media_url_https	    extended_entities/media/0/url	
+#extended_entities/media/0/display_url	
+#extended_entities/media/0/expanded_url	        extended_entities/media/0/type	
+#extended_entities/media/0/sizes/thumb/w	    extended_entities/media/0/sizes/thumb/h	
+#extended_entities/media/0/sizes/thumb/resize	
+#extended_entities/media/0/sizes/medium/w	    extended_entities/media/0/sizes/medium/h	
+#extended_entities/media/0/sizes/medium/resize	extended_entities/media/0/sizes/large/w	
+#extended_entities/media/0/sizes/large/h	    extended_entities/media/0/sizes/large/resize	
+#extended_entities/media/0/sizes/small/w	    extended_entities/media/0/sizes/small/h	
+#extended_entities/media/0/sizes/small/resize	
+#extended_entities/media/1/id	                extended_entities/media/1/id_str	
+#extended_entities/media/1/indices/0	        extended_entities/media/1/indices/1	
+#extended_entities/media/1/media_url	        extended_entities/media/1/media_url_https	
+#extended_entities/media/1/url	                extended_entities/media/1/display_url	
+#extended_entities/media/1/expanded_url	        extended_entities/media/1/type	
+#extended_entities/media/1/sizes/large/w	    extended_entities/media/1/sizes/large/h	
+#extended_entities/media/1/sizes/large/resize	extended_entities/media/1/sizes/thumb/w	
+#extended_entities/media/1/sizes/thumb/h	    extended_entities/media/1/sizes/thumb/resize	
+#extended_entities/media/1/sizes/medium/w	
+#extended_entities/media/1/sizes/medium/h
+#extended_entities/media/1/sizes/medium/resize	extended_entities/media/1/sizes/small/w	
+#extended_entities/media/1/sizes/small/h	    extended_entities/media/1/sizes/small/resize	
+#extended_entities/media/2/id	                extended_entities/media/2/id_str	
+#extended_entities/media/2/indices/0	        extended_entities/media/2/indices/1	
+#extended_entities/media/2/media_url	        extended_entities/media/2/media_url_https	
+#extended_entities/media/2/url	                extended_entities/media/2/display_url	
+#extended_entities/media/2/expanded_url	
+#extended_entities/media/2/type	                extended_entities/media/2/sizes/large/w	
+#extended_entities/media/2/sizes/large/h	
+#extended_entities/media/2/sizes/large/resize	extended_entities/media/2/sizes/thumb/w	
+#extended_entities/media/2/sizes/thumb/h	    extended_entities/media/2/sizes/thumb/resize	
+#extended_entities/media/2/sizes/medium/w	    extended_entities/media/2/sizes/medium/h	
+#extended_entities/media/2/sizes/medium/resize	extended_entities/media/2/sizes/small/w	
+#extended_entities/media/2/sizes/small/h	    extended_entities/media/2/sizes/small/resize	
+#extended_entities/media/3/id	                extended_entities/media/3/id_str	
+#extended_entities/media/3/indices/0	        extended_entities/media/3/indices/1	
+#extended_entities/media/3/media_url	        extended_entities/media/3/media_url_https	
+#extended_entities/media/3/url	
+#extended_entities/media/3/display_url	        extended_entities/media/3/expanded_url	
+#extended_entities/media/3/type	
+#extended_entities/media/3/sizes/large/w	
+#extended_entities/media/3/sizes/large/h	extended_entities/media/3/sizes/large/resize	
+#extended_entities/media/3/sizes/thumb/w	extended_entities/media/3/sizes/thumb/h	
+#extended_entities/media/3/sizes/thumb/resize	extended_entities/media/3/sizes/medium/w	
+#extended_entities/media/3/sizes/medium/h	extended_entities/media/3/sizes/medium/resize	
+#extended_entities/media/3/sizes/small/w	extended_entities/media/3/sizes/small/h	
+#extended_entities/media/3/sizes/small/resize	possibly_sensitive	entities/user_mentions/1/screen_name	
+#extended_tweet/full_text	extended_tweet/display_text_range/0	extended_tweet/display_text_range/1	
+#entities/urls/0/url	entities/urls/0/expanded_url	entities/urls/0/display_url	entities/urls/0/indices/0	
+#entities/urls/0/indices/1	extended_tweet/entities/user_mentions/0/screen_name	
+#extended_tweet/entities/user_mentions/0/name	extended_tweet/entities/user_mentions/0/id	
+#extended_tweet/entities/user_mentions/0/id_str	extended_tweet/entities/user_mentions/0/indices/0	
+#extended_tweet/entities/user_mentions/0/indices/1	extended_tweet/entities/user_mentions/1/screen_name	
+#extended_tweet/entities/user_mentions/1/name	
+#extended_tweet/entities/user_mentions/1/id	extended_tweet/entities/user_mentions/1/id_str	
+#extended_tweet/entities/user_mentions/1/indices/0	extended_tweet/entities/user_mentions/1/indices/1	
+#extended_tweet/entities/user_mentions/2/screen_name	extended_tweet/entities/user_mentions/2/name	
+#extended_tweet/entities/user_mentions/2/id	 extended_tweet/entities/user_mentions/2/id_str	
+#extended_tweet/entities/user_mentions/2/indices/0	extended_tweet/entities/user_mentions/2/indices/1	
+#extended_tweet/entities/user_mentions/3/screen_name	extended_tweet/entities/user_mentions/3/name	
+#extended_tweet/entities/user_mentions/3/id	extended_tweet/entities/user_mentions/3/id_str	
+#extended_tweet/entities/user_mentions/3/indices/0	extended_tweet/entities/user_mentions/3/indices/1	
+#	quoted_status/entities/media/0/id	quoted_status/entities/media/0/id_str
+#extended_tweet/entities/media/0/id_str	extended_tweet/entities/media/0/indices/0	
+#extended_tweet/entities/media/0/indices/1	extended_tweet/entities/media/0/media_url	
+#extended_tweet/entities/media/0/media_url_https	extended_tweet/entities/media/0/url	
+#extended_tweet/entities/media/0/display_url	extended_tweet/entities/media/0/expanded_url	
+#extended_tweet/entities/media/0/type	extended_tweet/entities/media/0/sizes/thumb/w	
+#extended_tweet/entities/media/0/sizes/thumb/h	extended_tweet/entities/media/0/sizes/thumb/resize	
+#extended_tweet/entities/media/0/sizes/large/w	extended_tweet/entities/media/0/sizes/large/h	
+#extended_tweet/entities/media/0/sizes/large/resize	extended_tweet/entities/media/0/sizes/small/w	
+#extended_tweet/entities/media/0/sizes/small/h	extended_tweet/entities/media/0/sizes/small/resize	
+#extended_tweet/entities/media/0/sizes/medium/w	extended_tweet/entities/media/0/sizes/medium/h	
+#extended_tweet/entities/media/0/sizes/medium/resize	extended_tweet/extended_entities/media/0/id	
+#extended_tweet/extended_entities/media/0/id_str	extended_tweet/extended_entities/media/0/indices/0	
+#extended_tweet/extended_entities/media/0/indices/1	extended_tweet/extended_entities/media/0/media_url	
+#extended_tweet/extended_entities/media/0/media_url_https	extended_tweet/extended_entities/media/0/url	
+#extended_tweet/extended_entities/media/0/display_url	extended_tweet/extended_entities/media/0/expanded_url	
+#extended_tweet/extended_entities/media/0/type	extended_tweet/extended_entities/media/0/sizes/thumb/w	
+#extended_tweet/extended_entities/media/0/sizes/thumb/h	extended_tweet/extended_entities/media/0/sizes/thumb/resize	
+#extended_tweet/extended_entities/media/0/sizes/large/w	extended_tweet/extended_entities/media/0/sizes/large/h	
+#extended_tweet/extended_entities/media/0/sizes/large/resize	
+#extended_tweet/extended_entities/media/0/sizes/small/w	
+#extended_tweet/extended_entities/media/0/sizes/small/h	extended_tweet/extended_entities/media/0/sizes/small/resize	
+#extended_tweet/extended_entities/media/0/sizes/medium/w	extended_tweet/extended_entities/media/0/sizes/medium/h	
+#extended_tweet/extended_entities/media/0/sizes/medium/resize	quoted_status/place/id	quoted_status/place/url	
+#extended_tweet/entities/hashtags/0/indices/0	extended_tweet/entities/hashtags/0/indices/1	
+#extended_tweet/entities/hashtags/1/text	extended_tweet/entities/hashtags/1/indices/0	
+#extended_tweet/entities/hashtags/1/indices/1	extended_tweet/entities/hashtags/2/text	
+#extended_tweet/entities/hashtags/2/indices/0	extended_tweet/entities/hashtags/2/indices/1	
+#extended_tweet/entities/hashtags/3/text	extended_tweet/entities/hashtags/3/indices/0	
+#extended_tweet/entities/hashtags/3/indices/1	extended_tweet/entities/hashtags/4/text	
+#extended_tweet/entities/hashtags/4/indices/0	extended_tweet/entities/hashtags/4/indices/1	
+#extended_tweet/entities/hashtags/5/text	extended_tweet/entities/hashtags/5/indices/0	
+#extended_tweet/entities/hashtags/5/indices/1	extended_tweet/entities/hashtags/6/text	
+#extended_tweet/entities/hashtags/6/indices/0	extended_tweet/entities/hashtags/6/indices/1	
+#extended_tweet/entities/hashtags/7/text	extended_tweet/entities/hashtags/7/indices/0	
+#extended_tweet/entities/hashtags/7/indices/1	
+#extended_tweet/entities/hashtags/8/text	extended_tweet/entities/hashtags/8/indices/0	
+#extended_tweet/entities/hashtags/8/indices/1	extended_tweet/entities/hashtags/9/text	
+#extended_tweet/entities/hashtags/9/indices/0	extended_tweet/entities/hashtags/9/indices/1	
+#extended_tweet/entities/media/0/additional_media_info/monetizable	
+#extended_tweet/entities/media/0/video_info/aspect_ratio/0	
+#extended_tweet/entities/media/0/video_info/aspect_ratio/1	
+#extended_tweet/entities/media/0/video_info/duration_millis	
+#extended_tweet/entities/media/0/video_info/variants/0/bitrate	
+#extended_tweet/entities/media/0/video_info/variants/0/content_type	
+#extended_tweet/entities/media/0/video_info/variants/0/url	
+#extended_tweet/entities/media/0/video_info/variants/1/content_type	
+#extended_tweet/entities/media/0/video_info/variants/1/url	
+#extended_tweet/entities/media/0/video_info/variants/2/bitrate	
+#extended_tweet/entities/media/0/video_info/variants/2/content_type	
+#extended_tweet/entities/media/0/video_info/variants/2/url	
+#extended_tweet/extended_entities/media/0/additional_media_info/monetizable	
+#extended_tweet/extended_entities/media/0/video_info/aspect_ratio/0	
+#extended_tweet/extended_entities/media/0/video_info/aspect_ratio/1	
+#extended_tweet/extended_entities/media/0/video_info/duration_millis	
+#extended_tweet/extended_entities/media/0/video_info/variants/0/bitrate	
+#extended_tweet/extended_entities/media/0/video_info/variants/0/content_type	
+#extended_tweet/extended_entities/media/0/video_info/variants/0/url	
+#extended_tweet/extended_entities/media/0/video_info/variants/1/content_type	
+#extended_tweet/extended_entities/media/0/video_info/variants/1/url	
+#extended_tweet/extended_entities/media/0/video_info/variants/2/bitrate	
+#extended_tweet/extended_entities/media/0/video_info/variants/2/content_type	
+#extended_tweet/extended_entities/media/0/video_info/variants/2/url	entities/hashtags/4/text	
+#entities/hashtags/4/indices/0	entities/hashtags/4/indices/1	
+#entities/hashtags/5/text	entities/hashtags/5/indices/0	entities/hashtags/5/indices/1	entities/hashtags/6/text
+#entities/hashtags/6/indices/0	entities/hashtags/6/indices/1	entities/hashtags/7/text	
+#entities/hashtags/7/indices/0	entities/hashtags/7/indices/1	entities/hashtags/8/text	
+#entities/hashtags/8/indices/0	entities/hashtags/8/indices/1	quoted_status/extended_entities/media/1/id	
+
+
+wb = openpyxl.Workbook()
+hoja= wb.create_sheet("name_sheet")
+hoja = wb['name_sheet']
+wb.active = hoja
+hoja['A1']='Tweet_id'
+hoja['B1']='Tweet_author'
+hoja['C1']='Tweet_author_id'
+hoja['D1']='Tweet_time'
+hoja['E1']='Tweet_language'
+hoja['F1']='Geo_type'
+hoja['G1']='Geo_coordinates_0'
+hoja['H1']='Geo_coordinates_1'
+hoja['I1']='Tweet_country'
+hoja['J1']='Tweet_place_name'
+hoja['K1']='Tweet_place_id'
+hoja['L1']='tweet_place_type'
+hoja['M1']='Bounding_box_type'
+hoja['N1']='Bounding_box_coordinates_0_0_0'
+hoja['O1']='Bounding_box_coordinates_0_0_1'
+hoja['P1']='Bounding_box_coordinates_0_1_0'
+hoja['Q1']='Bounding_box_coordinates_0_1_1'
+hoja['R1']='Bounding_box_coordinates_0_2_0'
+hoja['S1']='Bounding_box_coordinates_0_2_1'
+hoja['T1']='Bounding_box_coordinates_0_3_0'
+hoja['U1']='Bounding_box_coordinates_0_3_1'
+hoja['V1']='Tweet_author_loc'
+hoja['W1']='Tweet_text'
+hoja['X1']= 'Tweet_user_mentions_screen_name1'
+hoja['Y1']= 'Tweet_user_mentions_id1'
+for fila in range(len(tweets)):
+    hoja['A%d' % (fila+2)] = tweet_id[fila]
+    hoja['B%d' % (fila+2)] = tweet_author[fila]
+    hoja['C%d' % (fila+2)] = tweet_author_id[fila]
+    hoja['D%d' % (fila+2)] = tweet_time[fila]
+    hoja['E%d' % (fila+2)] = tweet_language[fila]
+    hoja['F%d' % (fila+2)] = tweet_geo_type[fila]
+    hoja['G%d' % (fila+2)] = tweet_geo_coordinates0[fila]
+    hoja['H%d' % (fila+2)] = tweet_geo_coordinates1[fila]
+    hoja['I%d' % (fila+2)] = tweet_place_country[fila]
+    hoja['J%d' % (fila+2)] = tweet_place_name[fila]
+    hoja['K%d' % (fila+2)] = tweet_place_id[fila]
+    hoja['L%d' % (fila+2)] = tweet_place_type[fila]
+    hoja['M%d' % (fila+2)]= tweet_bounding_box_type[fila]
+    hoja['N%d' % (fila+2)]= tweet_bounding_box_coordinates_0_0_0[fila]
+    hoja['O%d' % (fila+2)]= tweet_bounding_box_coordinates_0_0_1[fila]
+    hoja['P%d' % (fila+2)]= tweet_bounding_box_coordinates_0_1_0[fila]
+    hoja['Q%d' % (fila+2)]= tweet_bounding_box_coordinates_0_1_1[fila]
+    hoja['R%d' % (fila+2)]= tweet_bounding_box_coordinates_0_2_0[fila]
+    hoja['S%d' % (fila+2)]= tweet_bounding_box_coordinates_0_2_1[fila]
+    hoja['T%d' % (fila+2)]= tweet_bounding_box_coordinates_0_3_0[fila]
+    hoja['U%d' % (fila+2)]= tweet_bounding_box_coordinates_0_3_1[fila]
+    hoja['V%d' % (fila+2)] = tweet_author_loc[fila] 
+    hoja['W%d' % (fila+2)] = tweet_text[fila]
+    hoja['X%d' % (fila+2)] = tweet_entities_user_mentions_screen_name1[fila]
+    hoja['Y%d' % (fila+2)] = tweet_entities_user_mentions_user_id1[fila]
+
+wb.save('name_excel.xlsx')
