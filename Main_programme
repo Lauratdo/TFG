@@ -1,0 +1,669 @@
+# -*- coding: utf-8 -*-
+"""
+@author: Lauratdo
+"""
+import xlrd 
+import random
+from datetime import datetime
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+
+def contact(lst_p1_x,lst_p1_y, lst_p2_y, lst_p4_x, p1_x, p1_y, p2_x, p2_y, p3_x, p3_y, p4_x, p4_y):
+    """
+    La función calcula si una persona ha sido contacto de las ya contagiadas.
+
+    Parameters
+    ----------
+    lst_p1_x : List
+        Lista de las posiciones x de los puntos 1 de los rectangulos de las posiciones de los contagiados
+    lst_p1_y : List
+        Lista de las posiciones y de los puntos 1 de los rectangulos de las posiciones de los contagiados
+    lst_p2_y : List
+        Lista de las posiciones y de los puntos 2 de los rectangulos de las posiciones de los contagiados
+    lst_p4_x : List
+        Lista de las posiciones x de los puntos 4 de los rectangulos de las posiciones de los contagiados
+    p1_x : Float
+        Coordenada x del punto 1
+    p1_y : Float
+        Coordenada y del punto 1
+    p2_x : Float
+        Coordenada x del punto 2
+    p2_y : Float
+        Coordenada y del punto 2
+    p3_x : Float
+        Coordenada x del punto 3
+    p3_y : Float
+        Coordenada y del punto 3
+    p4_x : Float
+        Coordenada x del punto 4
+    p4_y : Float
+        Coordenada y del punto 4
+        
+    Representación de los rectangulos de posición    
+        p2---------------p3
+        |                |
+        |                |
+        |                |
+        p1--------------p4
+        
+    Returns
+    -------
+    contacto : Boolean
+        Dice si esa persona es contacto de algún contagiado.
+
+    """
+    contacto=False
+    for element in range(len(lst_p1_x)):
+        #Caso 1: El vertice inferior izquierdo toca un cuadrado infectado
+        if (lst_p4_x[element] >= p1_x >= lst_p1_x[element]) and (lst_p1_y[element]<= p1_y <=lst_p2_y[element]):
+            contacto=True
+        #Caso 2: El vertice superior izquierdo toca un cuadrado infectado
+        elif (lst_p4_x[element] >= p2_x >= lst_p1_x[element]) and (lst_p1_y[element]<= p2_y <=lst_p2_y[element]):
+            contacto=True
+        #Caso 3: El vertice superior derecho toca un cuadrado infectado
+        elif (lst_p4_x[element] >= p3_x >= lst_p1_x[element]) and (lst_p1_y[element]<= p3_y <=lst_p2_y[element]):
+            contacto=True
+        #Caso 4: El vertice inferior derecho toca un cuadrado infectado
+        elif (lst_p4_x[element] >= p4_x >= lst_p1_x[element]) and (lst_p1_y[element]<= p4_y <=lst_p2_y[element]):
+            contacto=True
+    return contacto
+
+def convertir_fecha(date):
+    """
+    La funcion convierte el string de la variable date de los datos en un formato de fecha.
+
+    Parameters
+    ----------
+    date : String
+        Fecha en formato de cadena de caracteres
+
+    Returns
+    -------
+    fecha_dt : datetime
+        Fecha en formato de fecha y hora
+
+    """
+    indice = date.index('+')
+    subcadena = date[8:indice]
+    fecha_dt = datetime.strptime(subcadena, '%d %H:%M:%S ')
+    return fecha_dt
+
+def curados(fecha_cont, fecha, dur_con):
+    """
+    Esta función calcula si una persona esta curada.
+
+    Parameters
+    ----------
+    fecha_cont : datetime
+        Fecha de contagio
+    fecha : datetime
+        Fecha en la que estamos mirando si ya no esta contagiado
+    dur_con : integer
+        Duración del contagio en segundos
+
+    Returns
+    -------
+    cur : Boolean
+        Dice si la persona esta curada
+
+    """
+    dif=  fecha - fecha_cont
+    if dif.seconds>dur_con:
+        cur=True
+    else:
+        cur=False
+    return cur
+
+def nuevalistadecurados(contagiados, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, n):
+    """
+    Esta función renueva la lista de contagiados quitando a los que ya estan curados.
+
+    Parameters
+    ----------
+    contagiados : List
+        Lista de los contagiados antes de quitar a los ya curados
+    fechas : List
+        Lista de las fechas de contagio de los contagiados antes de quitar a los ya curados
+    lst_p1_x : List
+        Lista de las posiciones x de los puntos 1 de los rectangulos de las posiciones de los contagiados antes de quitar a los ya curados
+    lst_p1_y : List
+        Lista de las posiciones y de los puntos 1 de los rectangulos de las posiciones de los contagiados antes de quitar a los ya curados
+    lst_p2_y : List
+        Lista de las posiciones y de los puntos 2 de los rectangulos de las posiciones de los contagiados antes de quitar a los ya curados
+    lst_p4_x : List
+        Lista de las posiciones x de los puntos 4 de los rectangulos de las posiciones de los contagiados antes de quitar a los ya curados
+    n : Integer
+        Posicion de la primera vez que aparece el curado en la lista de contagiados
+
+    Returns
+    -------
+    contagiados : List
+        Lista de los contagiados después de quitar los curados
+    fechas : List
+        Lista de las fechas de contagio de los contagiados después de quitar los curados
+    lst_p1_x : List
+        Lista de las posiciones x de los puntos 1 de los rectangulos de las posiciones de los contagiados después de quitar los curados
+    lst_p1_y : List
+        Lista de las posiciones y de los puntos 1 de los rectangulos de las posiciones de los contagiados después de quitar los curados
+    lst_p2_y : List
+        Lista de las posiciones y de los puntos 2 de los rectangulos de las posiciones de los contagiados después de quitar los curados
+    lst_p4_x : List
+        Lista de las posiciones x de los puntos 4 de los rectangulos de las posiciones de los contagiados después de quitar los curados
+
+    """
+    nom_cur=contagiados[n]
+    aux=0
+    while aux < len(contagiados):
+        if nom_cur== contagiados[aux]:
+            contagiados.pop(aux)
+            fechas.pop(aux)
+            lst_p1_x.pop(aux) 
+            lst_p1_y.pop(aux)
+            lst_p2_y.pop(aux) 
+            lst_p4_x.pop(aux)
+        else:
+            aux+=1
+    return contagiados, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x
+
+def quitarcurados_con_inmunidad(contagiados, inmunes, fechas, fecha, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, dur_cont):
+    """
+    La función quita de la lista de contagiados a las personas que ya han pasado el tiempo de duración del contagio y las añade a la lista de inmunes
+
+    Parameters
+    ----------
+    contagiados : List
+        Lista de los contagiados antes de quitar a los ya curados
+    inmunes : List
+        Lista de inmunes antes de introducir a los nuevos inmunes
+    fechas : List
+        Lista de las fechas de contagio de los contagiados antes de quitar a los ya curados
+    fecha : datetime
+        Fecha en la que estamos mirando si ya no esta contagiado
+    lst_p1_x : List
+        Lista de las posiciones x de los puntos 1 de los rectangulos de las posiciones de los contagiados antes de quitar a los ya curados
+    lst_p1_y : List
+        Lista de las posiciones y de los puntos 1 de los rectangulos de las posiciones de los contagiados antes de quitar a los ya curados
+    lst_p2_y : List
+        Lista de las posiciones y de los puntos 2 de los rectangulos de las posiciones de los contagiados antes de quitar a los ya curados
+    lst_p4_x : List
+        Lista de las posiciones x de los puntos 4 de los rectangulos de las posiciones de los contagiados antes de quitar a los ya curados
+    dur_cont : integer
+        Duración del contagio en segundos
+
+    Returns
+    -------
+    contagiados : List
+        Lista de los contagiados después de quitar los curados
+    inmunes : List
+        Lista de nombres de los inmunes déspues de introducir a los nuevos inmunes
+    fechas : List
+        Lista de las fechas de contagio de los contagiados después de quitar los curados
+    lst_p1_x : List
+        Lista de las posiciones x de los puntos 1 de los rectangulos de las posiciones de los contagiados después de quitar los curados
+    lst_p1_y :  List
+        Lista de las posiciones y de los puntos 1 de los rectangulos de las posiciones de los contagiados después de quitar los curados
+    lst_p2_y : List
+        Lista de las posiciones y de los puntos 2 de los rectangulos de las posiciones de los contagiados después de quitar los curados
+    lst_p4_x : List
+        Lista de las posiciones x de los puntos 4 de los rectangulos de las posiciones de los contagiados después de quitar los curados
+
+    """
+    j=0
+    while j < len(fechas):
+        fecha_cont= fechas[j]
+        curado=False
+        curado= curados(fecha_cont, fecha, dur_cont)
+        if curado:
+            inmunes.append(contagiados[j])
+            contagiados, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x = nuevalistadecurados(contagiados, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, j)
+        else:
+            break  
+    return contagiados, inmunes, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x
+
+def quitarcurados_sin_inmunidad(contagiados, fechas, fecha, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, dur_cont):
+    """
+    La función quita de la lista de contagiados a las personas que ya han pasado el tiempo de duración del contagio
+
+    Parameters
+    ----------
+    contagiados : List
+        Lista de los contagiados antes de quitar a los ya curados
+    inmunes : List
+        Lista de inmunes antes de introducir a los nuevos inmunes
+    fechas : List
+        Lista de las fechas de contagio de los contagiados antes de quitar a los ya curados
+    fecha : datetime
+        Fecha en la que estamos mirando si ya no esta contagiado
+    lst_p1_x : List
+        Lista de las posiciones x de los puntos 1 de los rectangulos de las posiciones de los contagiados antes de quitar a los ya curados
+    lst_p1_y : List
+        Lista de las posiciones y de los puntos 1 de los rectangulos de las posiciones de los contagiados antes de quitar a los ya curados
+    lst_p2_y : List
+        Lista de las posiciones y de los puntos 2 de los rectangulos de las posiciones de los contagiados antes de quitar a los ya curados
+    lst_p4_x : List
+        Lista de las posiciones x de los puntos 4 de los rectangulos de las posiciones de los contagiados antes de quitar a los ya curados
+    dur_cont : integer
+        Duración del contagio en segundos
+
+    Returns
+    -------
+    contagiados : List
+        Lista de los contagiados después de quitar los curados
+    inmunes : List
+        Lista de nombres de los inmunes déspues de introducir a los nuevos inmunes
+    fechas : List
+        Lista de las fechas de contagio de los contagiados después de quitar los curados
+    lst_p1_x : List
+        Lista de las posiciones x de los puntos 1 de los rectangulos de las posiciones de los contagiados después de quitar los curados
+    lst_p1_y :  List
+        Lista de las posiciones y de los puntos 1 de los rectangulos de las posiciones de los contagiados después de quitar los curados
+    lst_p2_y : List
+        Lista de las posiciones y de los puntos 2 de los rectangulos de las posiciones de los contagiados después de quitar los curados
+    lst_p4_x : List
+        Lista de las posiciones x de los puntos 4 de los rectangulos de las posiciones de los contagiados después de quitar los curados
+
+    """
+    j=0
+    while j < len(fechas):
+        fecha_cont= fechas[j]
+        curado=False
+        curado= curados(fecha_cont, fecha, dur_cont)
+        if curado:
+            contagiados, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x = nuevalistadecurados(contagiados, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, j)
+        else:
+            break  
+    return contagiados, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x
+
+def dibujar_contagiados(p1_x, p1_y, p2_y, p4_x, foto):
+    """
+    La función genera un plot con la posición de los contagiados
+
+    Parameters
+    ----------
+    p1_x : Float
+        Coordenada x del punto 1
+    p1_y : Float
+        Coordenada y del punto 1
+    p2_y : Float
+        Coordenada y del punto 2
+    p4_x : Float
+        Coordenada x del punto 4
+    foto : Integer
+        Número de foto que se dibuja con los contagiados
+        
+    Representación de los rectangulos de posición    
+        p2---------------p3
+        |                |
+        |                |
+        |                |
+        p1--------------p4
+        
+
+    Returns
+    -------
+    None.
+
+    """
+    fig, ax = plt.subplots()
+    plt.axis([-10,-4,36,45]) #Bounding
+    ax.plot([0,0],[0,0])
+    for k in range(len(p1_x)):    
+        altura=p2_y[k]-p1_y[k]
+        anchura=p4_x[k]-p1_x[k]
+        ax.add_patch(patches.Rectangle((p1_x[k], p1_y[k]), altura, anchura, facecolor = 'red', fill=True) )
+    plt.ioff()
+    arc='Contagiados'+str(foto)+'.png'
+    plt.savefig(arc)
+    
+def buscar_datos_contagiados(datos, lst_cont_id):
+    """
+    La función busca en nuestros datos el nombre, la fecha de contagio y la posición del contagiado a partir de su id.
+    Coge la primera entrada con ese id.
+
+    Parameters
+    ----------
+    datos : List
+        Matriz que contiene todos los datos del archivo elegido
+    lst_cont_id : List
+        Lista de los id de las personas contagiadas con las que iniciaremos
+
+    Returns
+    -------
+    lst_cont_nombres : List
+        Lista de los nombres de las personas contagiadas inicialmente
+    lst_cont_fechas : List
+        Lista de las fechas de contagio de las personas contagiadas inicialmente
+    lst_cont_p1_x : List
+        Lista de las posiciones x de los puntos 1 de los rectangulos de las posiciones de los contagiados inicialmente
+    lst_cont_p1_y : List
+        Lista de las posiciones y de los puntos 1 de los rectangulos de las posiciones de los contagiados inicialmente
+    lst_cont_p2_y : List
+        Lista de las posiciones y de los puntos 2 de los rectangulos de las posiciones de los contagiados inicialmente
+    lst_cont_p4_x : List
+        Lista de las posiciones x de los puntos 4 de los rectangulos de las posiciones de los contagiados inicialmente
+
+    """
+    lst_cont_nombres=[]
+    lst_cont_fechas=[]
+    lst_cont_p1_x=[]
+    lst_cont_p1_y=[]
+    lst_cont_p2_y=[]
+    lst_cont_p4_x=[]
+    for cont_id in lst_cont_id:
+        for j in range(len(datos)):
+            if cont_id in datos[j]:
+                lst_cont_nombres.append(datos[j][0])
+                lst_cont_fechas.append(convertir_fecha(datos[j][2]))
+                lst_cont_p1_x.append(datos[j][3])
+                lst_cont_p1_y.append(datos[j][4])
+                lst_cont_p2_y.append(datos[j][6])
+                lst_cont_p4_x.append(datos[j][9])
+                break
+    return lst_cont_nombres, lst_cont_fechas, lst_cont_p1_x, lst_cont_p1_y, lst_cont_p2_y, lst_cont_p4_x, j
+
+def dibujar_cantidad_cont(x, y, inmunidad, t_cont):
+    """
+    Esta funcion dibuja un analisis de la evolucion de los contagios a lo largo del tiempo
+
+    Parameters
+    ----------
+    x : List
+        Lista de los tiempo los cuales iran en la coordenada x
+    y : List
+        Lista de la cantidad de gente contagiada que se colocara en la coordenada y
+
+    Returns
+    -------
+    None.
+
+    """
+    plt.plot(x, y,'o')
+    plt.xlabel('Tiempo transcurrido en segundos')
+    plt.ylabel('Número de personas contagiadas')
+    if inmunidad:
+        frase='Personas contagiadas a lo largo del tiempo \n con duración del contagio de '+ str(t_cont)+ ' segundos y con inmunidad'
+    else:
+        frase='Personas contagiadas a lo largo del tiempo \n con duración del contagio de '+ str(t_cont)+ ' segundos y sin inmunidad'   
+    plt.title(frase)
+    plt.show()
+    plt.savefig('Analisis contagiados')
+    return None
+
+def elegir_vacunado(dato_comp, list_inmu, lst_cont):
+    """
+    Esta funcion elige una persona la azar y la vacuna pasandola a la lista de inmunes.
+    Si la persona esta contagiada en ese momento no la vacunamos.
+    
+    Parameters
+    ----------
+    dato_comp : List
+        Lista de todos los datos recogidos
+    list_inmu : List
+        Lista de los nombres de las personas inmunizadas
+    lst_contag: List
+        Lista de los nombres de los contagiados
+
+    Returns
+    -------
+    list_inmu : List
+        Lista de los nombres de las personas inmunizadas
+
+    """
+    random_person=random.choice(dato_comp)
+    name=random_person[0]
+    for cont in range(10): #hago 10 intentos para vacunar a una persona, si las diez estan contagiadas en ese momento no vacuno a nadie.
+        if not (name in lst_cont):
+            if name in list_inmu:
+                break #Ya son inmunes, los vacuno pero no los añado dos veces a la misma lista
+            else:
+                list_inmu.append(name)
+                break
+        else:
+            random_person=random.choice(dato_comp)
+            name=random_person[0]
+    return list_inmu
+
+def vacunar(lst_inmu, datos_comp, lst_contag, fecha_act, fecha_vacuna, t_vacuna):
+    """
+    Esta función vacuna a una persona al azar cada tiempo t_vacuna
+    Parameters
+    ----------
+    lst_inmu : List
+        Lista de los nombres de las personas inmunizadas
+    datos_comp : List
+        Lista de todos los datos recogidos
+    lst_contag: List
+        Lista de los nombres de los contagiados
+    fecha_act : Datetime
+        Fecha en la que estamos mirando si vacunamos a alguien
+    fecha_vacuna : Datetime
+        La última vez que vacunamos a alguien
+    t_vacuna : Integer
+        Tiempo que tardara en vacunar al siguiente
+
+    Returns
+    -------
+    lst_inmu : List
+        Lista de los nombres de las personas inmunizadas
+    t_vacuna : Integer
+        Tiempo que tardara en vacunar al siguiente
+
+    """
+    dif_fecha=fecha_act-fecha_vacuna
+    if dif_fecha.seconds>=t_vacuna:
+        lst_inmu=elegir_vacunado(datos_comp, lst_inmu, lst_contag)
+        fecha_vacuna=fecha_act
+        if t_vacuna>10:
+            t_vacuna=t_vacuna-10
+        else:
+            t_vacuna=1
+    return lst_inmu, t_vacuna   
+
+def append_contagiados(contagiados,fechas, lista_p1_x, lista_p1_y, lista_p2_y, lista_p4_x, nombre, fecha, p1_x, p1_y, p2_y, p4_x):
+    contagiados.append(nombre)
+    fechas.append(fecha)
+    lista_p1_x.append(p1_x)
+    lista_p1_y.append(p1_y)
+    lista_p2_y.append(p2_y)
+    lista_p4_x.append(p4_x)
+    return contagiados, fechas, lista_p1_x, lista_p1_y, lista_p2_y, lista_p4_x
+
+def contag(fil, file, lst_cont_antes, dur_cont, prob, inmunidad, dib_mapa, t_vacuna):
+    """
+    Es la función principal. Dibuja e imprime en un .txt las personas contagiadas en cada momento. 
+    Esta función crea inmunidad o no dependiendo de la variable inmunidad si alguien se contagiqa
+
+    Parameters
+    ----------
+    fil : List
+        Matriz de todos los datos del archivo elegido
+    file : File
+        Archivo txt donde se guardaran las listas de contagiados en cada iteración
+    lst_cont_antes : List
+        Lista de los id de las personas contagiadas inicialmente
+    dur_cont : Integer
+        Duración del contagio en segundos
+    prob : Float
+        Probabilidad de contagiarse habiendo estado en contacto con un contagiado
+    inmunidad: Boolean
+        Dice si se genera inmunidad despues de un contagio
+    dib_mapa: Boolean
+        Dice si se generaran los mapas con las personas contagiadas
+    t_vacuna: Integer
+        Tiempo que tardara en vacunar al siguiente
+
+    Returns
+    -------
+    None.
+
+    """
+    contagiados, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, ind = buscar_datos_contagiados(fil, lst_cont_antes)
+    list_inmunes=[]
+    list_analisis_time=[0]
+    list_analisis_cont=[]
+    list_analisis_cont.append(len(contagiados))
+    fecha_vacuna=fechas[0]
+    for aux in range(len(fechas)):
+        file.write(str(fechas[aux])+ ' ')
+        file.write(str(contagiados[aux])+"\n")
+    for i in range(ind,len(fil)-1):
+        fila_i1=fil[i+1]
+        name=fila_i1[0]
+        fecha=convertir_fecha(fila_i1[2])
+        p1_x=fila_i1[3]
+        p1_y=fila_i1[4]
+        p2_x=fila_i1[5]
+        p2_y=fila_i1[6]
+        p3_x=fila_i1[7]
+        p3_y=fila_i1[8]
+        p4_x=fila_i1[9]
+        p4_y=fila_i1[10]
+        contacto=False
+        count=0
+        if inmunidad==True:
+            contagiados, list_inmunes, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x = quitarcurados_con_inmunidad(contagiados,list_inmunes, fechas, fecha, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, dur_cont)
+        else:
+            contagiados, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x = quitarcurados_sin_inmunidad(contagiados, fechas, fecha, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, dur_cont)
+        list_inmunes, t_vacuna =vacunar(list_inmunes,fil,contagiados, fecha, fecha_vacuna, t_vacuna)
+        if not (name in list_inmunes):
+            if name in contagiados:
+                contagiados,fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x= append_contagiados(contagiados,fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, name, fecha, p1_x, p1_y, p2_y, p4_x)
+                file.write(str(fecha)+ ' ')
+                file.write(str(contagiados)+"\n")
+            else:
+                while not contacto and (count<len(lst_p1_x)):
+                    count+=1
+                    contacto = contact(lst_p1_x,lst_p1_y, lst_p2_y, lst_p4_x, p1_x, p1_y, p2_x, p2_y, p3_x, p3_y, p4_x, p4_y)
+                    if contacto: #Si hay contacto lo añadimos a la lista de contagiados teniendo en cuenta la probabilidad de contagio
+                        n = random.random()
+                        if n <= prob:
+                            contagiados,fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x = append_contagiados(contagiados,fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, name, fecha, p1_x, p1_y, p2_y, p4_x)
+                            file.write(str(fecha)+ ' ')
+                            file.write(str(contagiados)+"\n")
+                            if dib_mapa and (not(contagiados == [])):
+                                dibujar_contagiados(contagiados,lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, i)
+        else:
+            None
+        if i%1000==0:
+            list_analisis_time.append(i)
+            list_analisis_cont.append(len(contagiados))
+    dibujar_cantidad_cont(list_analisis_time, list_analisis_cont, inmunidad, dur_cont)                    
+    return None
+def sacar_datos_comp(archivo, duracion_contagio, probabilidad, lst_contagiados_antes, inmunity, consin, dib_map, vacuna):
+    wb = xlrd.open_workbook(archivo)
+    num_sheet=wb.nsheets
+    filas = []
+    titulos=[]
+    for sh in range(num_sheet):
+        hoja = wb.sheet_by_index(sh) 
+        nombres = hoja.row(0) 
+        for fila in range(1,hoja.nrows):
+            columnas = []
+            if hoja.cell_value(fila,11) == 'city':
+                for columna in [1,2,3,13,14,15,16,17,18,19,20]:
+                    columnas.append(hoja.cell_value(fila,columna))
+                    titulos.append(nombres[columna])
+                filas.append(columnas)
+    
+    nombre_txt='contagiados_'+str(duracion_contagio) + consin +'inmunidad.txt'
+    file=open(nombre_txt, "w")
+    contag(filas, file,lst_contagiados_antes ,duracion_contagio, probabilidad, inmunity, dib_map, vacuna)
+    file.close()
+    return None
+
+#interfaz gráfica
+
+import tkinter
+from tkinter import ttk
+ventana=tkinter.Tk()
+ventana.geometry("500x400")
+ventana.title("Análisis de los contagiados")
+
+archivo_etiqueta=tkinter.Label(ventana, text = 'Nombre del archivo excel sin extensión:')
+archivo_etiqueta.grid(row=0, column=0)
+archivo_cajatexto=tkinter.Entry(ventana)
+archivo_cajatexto.grid(row=0, column=1)
+archivo_extension_etiqueta=tkinter.Label(ventana, text = '.xlsx')
+archivo_extension_etiqueta.grid(row=0, column=2)
+
+duracion_contagio_etiqueta=tkinter.Label(ventana, text = 'Duración del contagio en segundos:')
+duracion_contagio_etiqueta.grid(row=1, column=0)
+duracion_contagio_cajatexto=tkinter.Entry(ventana)
+duracion_contagio_cajatexto.grid(row=1, column=1)
+
+probabilidad_etiqueta=tkinter.Label(ventana, text = 'Probabilidad de contagio: (Formato 0.4): ')
+probabilidad_etiqueta.grid(row=2, column=0)
+probabilidad_cajatexto=tkinter.Entry(ventana)
+probabilidad_cajatexto.grid(row=2, column=1)
+
+inmun_etiqueta=tkinter.Label(ventana, text ='¿Se genera inmunidad?:  ')
+inmun_etiqueta.grid(row=3, column=0)
+inmun_combo = ttk.Combobox(ventana)
+inmun_combo['values']= ("Si", "No")
+inmun_combo.current(1) #set the selected item
+inmun_combo.grid(row=3, column=1)
+
+vacuna_etiqueta=tkinter.Label(ventana, text = '¿Cada cuanto tiempo en segundos se esta vacunando?: ' )
+vacuna_etiqueta.grid(row=4, column=0)
+vacuna_cajatexto=tkinter.Entry(ventana)
+vacuna_cajatexto.grid(row=4, column=1)
+
+def anadir():
+    n=id_value.get()
+    if n!='':
+        lista.insert(tkinter.END,n)
+        id_value.set('')
+
+id_etiqueta=tkinter.Label(ventana,text='Ids contagiados:')
+id_etiqueta.grid(row=5, column=0)
+
+id_value=tkinter.IntVar()
+caja=tkinter.Entry(ventana,textvariable=id_value)
+caja.grid(row=5, column=1)
+
+boton=tkinter.Button(ventana,text='Añadir id',command=anadir)
+boton.grid(row=6, column=1)
+
+lista=tkinter.Listbox(ventana)
+lista.grid(row=7, column=1)
+
+mapa_etiqueta=tkinter.Label(ventana, text ='Generar mapas de posición de los contagiados: \n (Tardara más en ejecutarse el código): ')
+mapa_etiqueta.grid(row=8, column=0)
+mapa_combo = ttk.Combobox(ventana)
+mapa_combo['values']= ("Si", "No")
+mapa_combo.current(1) #set the selected item
+mapa_combo.grid(row=8, column=1)
+
+def textodelacaja_archivo():
+    archivo = str(archivo_cajatexto.get())+'.xlsx'
+    duracion_contagio = int(duracion_contagio_cajatexto.get())
+    probabilidad= float(probabilidad_cajatexto.get())
+    inmun= str(inmun_combo.get())
+
+    if 'No'== inmun:
+        inmunity=False
+        consin='_sin_'
+    else:
+        inmunity=True
+        consin = '_con_'
+    mapa=str(mapa_combo.get())
+    if mapa=='No':
+        dib_map=False
+    else:
+        dib_map=True
+    vacuna=int(vacuna_cajatexto.get())
+    num=lista.size()
+    if num==0:
+        tkinter.messagebox.showwarning('Error', 'Necesitas al menos un contagiado')
+    lst_contagiados_antes=[]
+    for pos in range(num):
+        contagiados_antes=lista.get(pos)
+        lst_contagiados_antes.append(contagiados_antes)
+    sacar_datos_comp(archivo, duracion_contagio, probabilidad, lst_contagiados_antes, inmunity, consin, dib_map, vacuna)
+    return None
+
+    
+boton1=tkinter.Button(ventana, text="Empezar", command=textodelacaja_archivo)
+boton1.grid(row=10, column=1)
+
+ventana.mainloop()
