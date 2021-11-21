@@ -314,6 +314,7 @@ def dibujar_contagiados(p1_x, p1_y, p2_y, p4_x, foto):
     plt.ioff()
     arc='Contagiados'+str(foto)+'.png'
     plt.savefig(arc)
+    plt.close()
     
 def buscar_datos_contagiados(datos, lst_cont_id):
     """
