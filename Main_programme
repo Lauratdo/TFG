@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 """
+Created on Sun Feb 21 16:12:47 2021
+
 @author: Lauratdo
 """
+
+
 import xlrd 
 import random
 from datetime import datetime
@@ -305,7 +309,7 @@ def dibujar_contagiados(p1_x, p1_y, p2_y, p4_x, foto):
 
     """
     fig, ax = plt.subplots()
-    plt.axis([-10,-4,36,45]) #Bounding
+    plt.axis([-10,-3,36,45]) #Bounding
     ax.plot([0,0],[0,0])
     for k in range(len(p1_x)):    
         altura=p2_y[k]-p1_y[k]
@@ -378,7 +382,7 @@ def dibujar_cantidad_cont(x, y, inmunidad, t_cont):
     None.
 
     """
-    plt.plot(x, y,'o')
+    plt.plot(x, y,'.:')
     plt.xlabel('Tiempo transcurrido en segundos')
     plt.ylabel('Número de personas contagiadas')
     if inmunidad:
@@ -386,8 +390,36 @@ def dibujar_cantidad_cont(x, y, inmunidad, t_cont):
     else:
         frase='Personas contagiadas a lo largo del tiempo \n con duración del contagio de '+ str(t_cont)+ ' segundos y sin inmunidad'   
     plt.title(frase)
+    plt.savefig('contagios.png')
     plt.show()
-    plt.savefig('Analisis contagiados')
+    plt.close()
+    return None
+
+def dibujar_cantidad_inmu(x, y, t_cont):
+    """
+    Esta funcion dibuja un analisis de la evolucion de los inmunes a lo largo del tiempo.
+    La inmunidad puede venir de haber pasado la enfermedad o de haberse vacunado.
+
+    Parameters
+    ----------
+    x : List
+        Lista de los tiempo los cuales iran en la coordenada x
+    y : List
+        Lista de la cantidad de gente inmune que se colocara en la coordenada y
+
+    Returns
+    -------
+    None.
+
+    """
+    plt.plot(x, y,'.:')
+    plt.xlabel('Tiempo transcurrido en segundos')
+    plt.ylabel('Número de personas inmunes')
+    frase='Personas inmunes con respecto al tiempo'
+    plt.title(frase)
+    plt.savefig('inmunidad.png')
+    plt.show()
+    plt.close()
     return None
 
 def elegir_vacunado(dato_comp, list_inmu, lst_cont):
@@ -454,13 +486,59 @@ def vacunar(lst_inmu, datos_comp, lst_contag, fecha_act, fecha_vacuna, t_vacuna)
     if dif_fecha.seconds>=t_vacuna:
         lst_inmu=elegir_vacunado(datos_comp, lst_inmu, lst_contag)
         fecha_vacuna=fecha_act
-        if t_vacuna>10:
-            t_vacuna=t_vacuna-10
+        if t_vacuna>5:
+            t_vacuna=t_vacuna-5
         else:
             t_vacuna=1
     return lst_inmu, t_vacuna   
 
 def append_contagiados(contagiados,fechas, lista_p1_x, lista_p1_y, lista_p2_y, lista_p4_x, nombre, fecha, p1_x, p1_y, p2_y, p4_x):
+    """
+    Esta funcion actualiza la lista de contagiados, fechas de contagio, y listas de posiciones
+
+    Parameters
+    ----------
+    contagiados : List
+        Lista de los nombres de los contagiados
+    fechas : List
+        Lista de las fechas de contagio
+    lista_p1_x : List
+        Lista de las posiciones x de los puntos 1 de los rectangulos de las posiciones de los contagiados
+    lista_p1_y : List
+        Lista de las posiciones y de los puntos 1 de los rectangulos de las posiciones de los contagiados
+    lista_p2_y : List
+        Lista de las posiciones y de los puntos 2 de los rectangulos de las posiciones de los contagiados
+    lista_p4_x : List
+        Lista de las posiciones x de los puntos 4 de los rectangulos de las posiciones de los contagiados
+    nombre : String
+        Nombre de la nueva persona contagiada a añadir
+    fecha : Datetime
+        Fecha de contagio.
+    p1_x : Float
+        Coordenada x del punto 1
+    p1_y : Float
+        Coordenada y del punto 1
+    p2_y : Float
+        Coordenada y del punto 2
+    p4_x : Float
+        Coordenada x del punto 4
+
+    Returns
+    -------
+    contagiados : TYPE
+        Lista de los nombres de los contagiados
+    fechas : TYPE
+        Lista de las fechas de contagio
+    lista_p1_x : TYPE
+        Lista de las posiciones x de los puntos 1 de los rectangulos de las posiciones de los contagiados
+    lista_p1_y : TYPE
+        Lista de las posiciones y de los puntos 1 de los rectangulos de las posiciones de los contagiados
+    lista_p2_y : TYPE
+        Lista de las posiciones y de los puntos 2 de los rectangulos de las posiciones de los contagiados
+    lista_p4_x : TYPE
+        Lista de las posiciones x de los puntos 4 de los rectangulos de las posiciones de los contagiados
+
+    """
     contagiados.append(nombre)
     fechas.append(fecha)
     lista_p1_x.append(p1_x)
@@ -498,59 +576,109 @@ def contag(fil, file, lst_cont_antes, dur_cont, prob, inmunidad, dib_mapa, t_vac
     None.
 
     """
+    ventana.destroy()
+    ventana3, p1=ventana_cargando()
     contagiados, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, ind = buscar_datos_contagiados(fil, lst_cont_antes)
     list_inmunes=[]
     list_analisis_time=[0]
     list_analisis_cont=[]
     list_analisis_cont.append(len(contagiados))
+    list_analisis_inmu=[]
+    list_analisis_inmu.append(len(list_inmunes))
     fecha_vacuna=fechas[0]
     for aux in range(len(fechas)):
         file.write(str(fechas[aux])+ ' ')
         file.write(str(contagiados[aux])+"\n")
     for i in range(ind,len(fil)-1):
-        fila_i1=fil[i+1]
-        name=fila_i1[0]
-        fecha=convertir_fecha(fila_i1[2])
-        p1_x=fila_i1[3]
-        p1_y=fila_i1[4]
-        p2_x=fila_i1[5]
-        p2_y=fila_i1[6]
-        p3_x=fila_i1[7]
-        p3_y=fila_i1[8]
-        p4_x=fila_i1[9]
-        p4_y=fila_i1[10]
-        contacto=False
-        count=0
-        if inmunidad==True:
-            contagiados, list_inmunes, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x = quitarcurados_con_inmunidad(contagiados,list_inmunes, fechas, fecha, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, dur_cont)
+        if contagiados==[]:#si la lista de contagiados es vacia no abra más contagios
+            break
         else:
-            contagiados, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x = quitarcurados_sin_inmunidad(contagiados, fechas, fecha, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, dur_cont)
-        list_inmunes, t_vacuna =vacunar(list_inmunes,fil,contagiados, fecha, fecha_vacuna, t_vacuna)
-        if not (name in list_inmunes):
-            if name in contagiados:
-                contagiados,fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x= append_contagiados(contagiados,fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, name, fecha, p1_x, p1_y, p2_y, p4_x)
-                file.write(str(fecha)+ ' ')
-                file.write(str(contagiados)+"\n")
+            fila_i1=fil[i+1]
+            name=fila_i1[0]
+            fecha=convertir_fecha(fila_i1[2])
+            p1_x=fila_i1[3]
+            p1_y=fila_i1[4]
+            p2_x=fila_i1[5]
+            p2_y=fila_i1[6]
+            p3_x=fila_i1[7]
+            p3_y=fila_i1[8]
+            p4_x=fila_i1[9]
+            p4_y=fila_i1[10]
+            contacto=False
+            count=0
+            if inmunidad==True:
+                contagiados, list_inmunes, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x = quitarcurados_con_inmunidad(contagiados,list_inmunes, fechas, fecha, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, dur_cont)
             else:
-                while not contacto and (count<len(lst_p1_x)):
-                    count+=1
-                    contacto = contact(lst_p1_x,lst_p1_y, lst_p2_y, lst_p4_x, p1_x, p1_y, p2_x, p2_y, p3_x, p3_y, p4_x, p4_y)
-                    if contacto: #Si hay contacto lo añadimos a la lista de contagiados teniendo en cuenta la probabilidad de contagio
-                        n = random.random()
-                        if n <= prob:
-                            contagiados,fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x = append_contagiados(contagiados,fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, name, fecha, p1_x, p1_y, p2_y, p4_x)
-                            file.write(str(fecha)+ ' ')
-                            file.write(str(contagiados)+"\n")
-                            if dib_mapa and (not(contagiados == [])):
-                                dibujar_contagiados(contagiados,lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, i)
-        else:
-            None
-        if i%1000==0:
+                contagiados, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x = quitarcurados_sin_inmunidad(contagiados, fechas, fecha, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, dur_cont)
+            list_inmunes, t_vacuna =vacunar(list_inmunes,fil,contagiados, fecha, fecha_vacuna, t_vacuna)
+            if not (name in list_inmunes):
+                if name in contagiados:
+                    contagiados,fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x= append_contagiados(contagiados,fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, name, fecha, p1_x, p1_y, p2_y, p4_x)
+                    file.write(str(fecha)+ ' ')
+                    file.write(str(contagiados)+"\n")
+                else:
+                    while not contacto and (count<len(lst_p1_x)):
+                       count+=1
+                       contacto = contact(lst_p1_x,lst_p1_y, lst_p2_y, lst_p4_x, p1_x, p1_y, p2_x, p2_y, p3_x, p3_y, p4_x, p4_y)
+                       if contacto: #Si hay contacto lo añadimos a la lista de contagiados teniendo en cuenta la probabilidad de contagio
+                            n = random.random()
+                            if n <= prob:
+                                contagiados,fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x = append_contagiados(contagiados,fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, name, fecha, p1_x, p1_y, p2_y, p4_x)
+                                file.write(str(fecha)+ ' ')
+                                file.write(str(contagiados)+"\n")
+                                if dib_mapa and (not(contagiados == [])):
+                                    dibujar_contagiados(lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, i)
+            else:
+                None
+        if i%70==0:
             list_analisis_time.append(i)
             list_analisis_cont.append(len(contagiados))
+            list_analisis_inmu.append(len(list_inmunes))
+        act_barra_progreso(i,ind,len(fil)-1, ventana3, p1, len(contagiados), len(list_inmunes))
     dibujar_cantidad_cont(list_analisis_time, list_analisis_cont, inmunidad, dur_cont)                    
+    dibujar_cantidad_inmu(list_analisis_time, list_analisis_inmu, dur_cont)
+    ventana3.destroy()
     return None
+def act_barra_progreso(i, inf, sup, ventana3, p1, long_cont, long_inm):
+    dif=sup-inf
+    prog=(i/dif)*100
+    p1["value"] = prog
+    contagiados_etiqueta=tkinter.Label(ventana3, text = str(long_cont))
+    contagiados_etiqueta.grid(row=5, column=0)
+    inmunes_etiqueta=tkinter.Label(ventana3, text = str(long_inm))
+    inmunes_etiqueta.grid(row=7, column=0)
+    ventana3.update()
+    return 
 def sacar_datos_comp(archivo, duracion_contagio, probabilidad, lst_contagiados_antes, inmunity, consin, dib_map, vacuna):
+    """
+    Esta función saca los datos necesarios del excel elegido.
+    Abre un documento .txt para ir apuntando la lista de contagiados y 
+    llama a la funcion principal
+
+    Parameters
+    ----------
+    archivo : String
+        Nombre del archivo que queremos abrir
+    duracion_contagio : Integer
+        Duración del contagio en segundos
+    probabilidad : Float
+        Probabilidad de contagiarse después de un contagio
+    lst_contagiados_antes : List
+        Lista de contagiados antes de empezar
+    inmunity : Boolean
+        Dice si se genera o no inmunidad
+    consin : String
+        Variable auxiliar para generar titulo de imagen dependiendo de si hay o no inmunidad
+    dib_map : Boolean
+        Dice si quiere que se dibujen o no los mapas de contagiados
+    vacuna : Integer
+        Cada cuanto tiempo se pone una vacuna, ira incrementando
+
+    Returns
+    -------
+    None.
+
+    """
     wb = xlrd.open_workbook(archivo)
     num_sheet=wb.nsheets
     filas = []
@@ -576,9 +704,11 @@ def sacar_datos_comp(archivo, duracion_contagio, probabilidad, lst_contagiados_a
 
 import tkinter
 from tkinter import ttk
+from PIL import ImageTk
+
 ventana=tkinter.Tk()
 ventana.geometry("500x400")
-ventana.title("Análisis de los contagiados")
+ventana.title("Análisis de la cantidad de contagiados")
 
 archivo_etiqueta=tkinter.Label(ventana, text = 'Nombre del archivo excel sin extensión:')
 archivo_etiqueta.grid(row=0, column=0)
@@ -610,6 +740,14 @@ vacuna_cajatexto=tkinter.Entry(ventana)
 vacuna_cajatexto.grid(row=4, column=1)
 
 def anadir():
+    """
+    Esta función añade en la lista de la interfaz gráfica un elemento más
+
+    Returns
+    -------
+    None.
+
+    """
     n=id_value.get()
     if n!='':
         lista.insert(tkinter.END,n)
@@ -663,8 +801,68 @@ def textodelacaja_archivo():
     sacar_datos_comp(archivo, duracion_contagio, probabilidad, lst_contagiados_antes, inmunity, consin, dib_map, vacuna)
     return None
 
-    
-boton1=tkinter.Button(ventana, text="Empezar", command=textodelacaja_archivo)
+def abrir_nueva_ventana_1():
+    """
+    Esta función genera una nueva ventana en la interfaz gráfica con la imagen del gráfico generado
+
+    Returns
+    -------
+    None.
+
+    """
+    ventana2=tkinter.Toplevel()
+    ventana2.title('Analisis de la cantidad de contagiados')
+    img=ImageTk.PhotoImage(file='contagios.png')
+    panel=tkinter.Label(ventana2, image=img)
+    panel.pack()
+    ventana5=tkinter.Toplevel()
+    ventana5.title('Analisis de la cantidad de inmunizados')
+    img2=ImageTk.PhotoImage(file='inmunidad.png')
+    panel=tkinter.Label(ventana5, image=img2)
+    panel.pack()
+    ventana2.mainloop()
+    return 
+
+def ventana_cargando():
+    """
+    Esta función genera una ventana de carga con una scrollbar y 
+    que imprime los datos que tenemos
+
+    Returns
+    -------
+    ventana3 : tkinter.Tk
+        Ventana que se genera mientras funciona el código 
+    p1 : tkinter.ttk.Progressbar
+        Barra de progreso que indica como va nuestro programa
+
+    """
+    ventana3 = tkinter.Tk()
+    ventana3.geometry('320x240')
+    ventana3.title('Calculando...')
+    p1 = ttk.Progressbar(ventana3, length=200, cursor='spider', mode="determinate", orient=tkinter.HORIZONTAL)
+    p1.grid(row=2,column=0)
+    num_cont_etiqueta=tkinter.Label(ventana3, text ='Número de contagiados: ')
+    num_cont_etiqueta.grid(row=4, column=0)
+    contagiados_etiqueta=tkinter.Label(ventana3, text ='1')
+    contagiados_etiqueta.grid(row=5, column=0)
+    num_cont_etiqueta=tkinter.Label(ventana3, text ='Número de inmunes: ')
+    num_cont_etiqueta.grid(row=6, column=0)
+    inmunes_etiqueta=tkinter.Label(ventana3, text ='0' )
+    inmunes_etiqueta.grid(row=7, column=0)
+    return ventana3, p1
+
+def dos_funciones():
+    """
+    En esta función hace el boton haga funcionar más de una función
+
+    Returns
+    -------
+    None.
+    """
+    textodelacaja_archivo()
+    abrir_nueva_ventana_1()  
+    return
+boton1=tkinter.Button(ventana, text="Empezar", command=dos_funciones)
 boton1.grid(row=10, column=1)
 
 ventana.mainloop()
