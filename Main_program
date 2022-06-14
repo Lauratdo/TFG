@@ -2,7 +2,7 @@
 """
 Created on Sun Feb 21 16:12:47 2021
 
-@author: Lauratdo
+@author: ltrujild
 """
 
 
@@ -118,7 +118,7 @@ def curados(fecha_cont, fecha, dur_con):
         cur=False
     return cur
 
-def nuevalistadecurados(contagiados, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, n):
+def nueva_lista_de_curados(contagiados, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, n):
     """
     Esta función renueva la lista de contagiados quitando a los que ya estan curados.
 
@@ -169,7 +169,7 @@ def nuevalistadecurados(contagiados, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p
             aux+=1
     return contagiados, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x
 
-def quitarcurados_con_inmunidad(contagiados, inmunes, fechas, fecha, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, dur_cont):
+def quitar_curados_con_inmunidad(contagiados, inmunes, fechas, fecha, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, dur_cont):
     """
     La función quita de la lista de contagiados a las personas que ya han pasado el tiempo de duración del contagio y las añade a la lista de inmunes
 
@@ -219,12 +219,12 @@ def quitarcurados_con_inmunidad(contagiados, inmunes, fechas, fecha, lst_p1_x, l
         curado= curados(fecha_cont, fecha, dur_cont)
         if curado:
             inmunes.append(contagiados[j])
-            contagiados, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x = nuevalistadecurados(contagiados, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, j)
+            contagiados, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x = nueva_lista_de_curados(contagiados, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, j)
         else:
             break  
     return contagiados, inmunes, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x
 
-def quitarcurados_sin_inmunidad(contagiados, fechas, fecha, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, dur_cont):
+def quitar_curados_sin_inmunidad(contagiados, fechas, fecha, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, dur_cont):
     """
     La función quita de la lista de contagiados a las personas que ya han pasado el tiempo de duración del contagio
 
@@ -273,7 +273,7 @@ def quitarcurados_sin_inmunidad(contagiados, fechas, fecha, lst_p1_x, lst_p1_y, 
         curado=False
         curado= curados(fecha_cont, fecha, dur_cont)
         if curado:
-            contagiados, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x = nuevalistadecurados(contagiados, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, j)
+            contagiados, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x = nueva_lista_de_curados(contagiados, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, j)
         else:
             break  
     return contagiados, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x
@@ -309,7 +309,7 @@ def dibujar_contagiados(p1_x, p1_y, p2_y, p4_x, foto):
 
     """
     fig, ax = plt.subplots()
-    plt.axis([-10,-3,36,45]) #Bounding
+    plt.axis([-10,-2,35,45]) #Bounding
     ax.plot([0,0],[0,0])
     for k in range(len(p1_x)):    
         altura=p2_y[k]-p1_y[k]
@@ -354,6 +354,7 @@ def buscar_datos_contagiados(datos, lst_cont_id):
     lst_cont_p1_y=[]
     lst_cont_p2_y=[]
     lst_cont_p4_x=[]
+    ind=0
     for cont_id in lst_cont_id:
         for j in range(len(datos)):
             if cont_id in datos[j]:
@@ -364,7 +365,9 @@ def buscar_datos_contagiados(datos, lst_cont_id):
                 lst_cont_p2_y.append(datos[j][6])
                 lst_cont_p4_x.append(datos[j][9])
                 break
-    return lst_cont_nombres, lst_cont_fechas, lst_cont_p1_x, lst_cont_p1_y, lst_cont_p2_y, lst_cont_p4_x, j
+        if j > ind:
+            ind=j
+    return lst_cont_nombres, lst_cont_fechas, lst_cont_p1_x, lst_cont_p1_y, lst_cont_p2_y, lst_cont_p4_x, ind
 
 def dibujar_cantidad_cont(x, y, inmunidad, t_cont):
     """
@@ -588,7 +591,7 @@ def contag(fil, file, lst_cont_antes, dur_cont, prob, inmunidad, dib_mapa, t_vac
     fecha_vacuna=fechas[0]
     for aux in range(len(fechas)):
         file.write(str(fechas[aux])+ ' ')
-        file.write(str(contagiados[aux])+"\n")
+        file.write(str(contagiados)+"\n")
     for i in range(ind,len(fil)-1):
         if contagiados==[]:#si la lista de contagiados es vacia no abra más contagios
             break
@@ -607,9 +610,9 @@ def contag(fil, file, lst_cont_antes, dur_cont, prob, inmunidad, dib_mapa, t_vac
             contacto=False
             count=0
             if inmunidad==True:
-                contagiados, list_inmunes, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x = quitarcurados_con_inmunidad(contagiados,list_inmunes, fechas, fecha, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, dur_cont)
+                contagiados, list_inmunes, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x = quitar_curados_con_inmunidad(contagiados,list_inmunes, fechas, fecha, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, dur_cont)
             else:
-                contagiados, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x = quitarcurados_sin_inmunidad(contagiados, fechas, fecha, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, dur_cont)
+                contagiados, fechas, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x = quitar_curados_sin_inmunidad(contagiados, fechas, fecha, lst_p1_x, lst_p1_y, lst_p2_y, lst_p4_x, dur_cont)
             list_inmunes, t_vacuna =vacunar(list_inmunes,fil,contagiados, fecha, fecha_vacuna, t_vacuna)
             if not (name in list_inmunes):
                 if name in contagiados:
@@ -773,7 +776,7 @@ mapa_combo['values']= ("Si", "No")
 mapa_combo.current(1) #set the selected item
 mapa_combo.grid(row=8, column=1)
 
-def textodelacaja_archivo():
+def texto_de_la_caja_archivo():
     archivo = str(archivo_cajatexto.get())+'.xlsx'
     duracion_contagio = int(duracion_contagio_cajatexto.get())
     probabilidad= float(probabilidad_cajatexto.get())
@@ -859,7 +862,7 @@ def dos_funciones():
     -------
     None.
     """
-    textodelacaja_archivo()
+    texto_de_la_caja_archivo()
     abrir_nueva_ventana_1()  
     return
 boton1=tkinter.Button(ventana, text="Empezar", command=dos_funciones)
